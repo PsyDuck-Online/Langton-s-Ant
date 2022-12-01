@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Langton's Ant</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container" >
+        <div id="canvas-scroll" class="left">
+            <canvas id="canvas"></canvas>
+        </div>
+
+        <div class="right">
+            <fieldset class="parametros">
+                <legend>Parametros</legend>
+                <div class="parametros-section">
+                    <div class="parametro">
+                        <label for="grid-size">Tamaño del tablero(casillas):</label>
+                        <input type="number" name="grid-size" id="grid-size">
+                    </div>
+
+                    <div class="parametro">
+                        <label for="cell-size">Tamaño de la celda:</label>
+                        <input type="range" name="cell-size" id="cell-size" value="5" min="1" max="10" step="1">
+                    </div>
+
+                    <div class="parametro">
+                        <label for="frame-rate">FPS:</label>
+                        <input type="range" name="frame-rate" id="frame-rate" value="60" min="10" max="60" step="5">
+                    </div>
+
+                    <div class="parametro">
+                        <label for="life-percent">Probabilidad de vida:</label>
+                        <input type="number" name="life-percent" id="frame-rate" value="0.05" min="0" max="1" step=".05">
+                    </div>
+
+
+                </div>
+            </fieldset>
+
+            <fieldset class="datos">
+                <legend>Datos:</legend>
+                <p>Generacion: <span id="generacion"></span></p>
+            </fieldset>
+        </div>
+    </div>
+
+    <script type="module" src="./js/main.js"></script>
+</body>
+</html>
