@@ -117,7 +117,7 @@ function newGame() {
     tablero = iniciarMundo();
     // Generamos las hormigas en el mundo
     generarHormigas();
-    //console.log(hormigas);
+    updateRules();
     imprimirDatos();
 }
 
