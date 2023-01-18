@@ -1,1 +1,0 @@
-direcciones = ['N', 'S', 'E', 'O']

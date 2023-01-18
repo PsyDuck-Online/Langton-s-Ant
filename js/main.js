@@ -59,6 +59,7 @@ newGameBtn.addEventListener('click', newGame);
 updateBtn.addEventListener('click', updateRules);
 playBtn.addEventListener('click', play);
 nextGenBtn.addEventListener('click', nextGen);
+canvas.addEventListener('mousedown', e => clickCanvas(e));
 
 /***************/
 /** FUNCIONES **/
@@ -215,6 +216,7 @@ function clickCanvas(e) {
     let coordenadas = getCursorPosition(e);
     poblacion = poblacion + 1;
     crearHormiga(coordenadas[0], coordenadas[1]);
+    imprimirDatos();
 }
 
 
