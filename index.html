@@ -33,10 +33,9 @@
                     </div>
 
                     <div class="parametro">
-                        <label for="life-percent">Probabilidad de vida:</label>
-                        <input type="number" name="life-percent" id="frame-rate" value="0.05" min="0" max="1" step=".05">
+                        <label for="distribution-percent">Distribucion del espacio:</label>
+                        <input type="number" name="distribution-percent" id="distribution-percent" value="0.5" min="0" max="1">
                     </div>
-
 
                 </div>
             </fieldset>
@@ -45,6 +44,37 @@
                 <legend>Datos:</legend>
                 <p>Generacion: <span id="generacion"></span></p>
                 <p>Poblacion: <span id="poblacion"></span></p>
+            </fieldset>
+
+            <fieldset class="controles">
+                <legend>Controles</legend>
+                <button id="new-game">New Game</button>
+                <button id="update-rules">Update Rules</button>
+                <button id="pause-play">Pause/Play</button>
+                <button id="next-gen">Next Generation</button>
+            </fieldset>
+
+            <fieldset class="colores">
+                <legend>Colores</legend>
+                <div class="parametro">
+                    <label for="reina">Reina:</label>
+                    <input type="color" name="reina" id="reina" value="#F01A17" readonly>
+                </div>
+
+                <div class="parametro">
+                    <label for="reproductora">Reproductora:</label>
+                    <input type="color" name="reproductora" id="reproductora" value="#17E0F0" readonly>
+                </div>
+
+                <div class="parametro">
+                    <label for="trabajadora">Trabajadora:</label>
+                    <input type="color" name="trabajadora" id="trabajadora" value="#B900FE" readonly>
+                </div>
+
+                <div class="parametro">
+                    <label for="soldado">Soldado:</label>
+                    <input type="color" name="soldado" id="soldado" value="#42F017" readonly>
+                </div>
             </fieldset>
         </div>
     </div>

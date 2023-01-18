@@ -12,5 +12,19 @@
 
 .container {
     display: grid;
-    grid-template-columns: 2fr 1fr;
+    grid-template-columns: 1fr 1fr;
 }
+
+.parametro {
+    margin: 10px;
+}
+
+
+.parametro input {
+    width: 60px;
+}
+
+.parametro #frame-rate {
+    width: 160px
+}
+

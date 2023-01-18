@@ -4,9 +4,22 @@ import { Trabajadora, Soldado, Reproductora, Reina } from "./Ant.js";
 /** VARIABLES **/
 /***************/
 
-// Elementos HTML
+// Elementos HTML //
+// Parametros
+const gridSizeElem = document.getElementById('grid-size');
+const cellSizeElem = document.getElementById('cell-size');
+const frameRateElem = document.getElementById('frame-rate');
+const distributionPercentElem = document.getElementById('distribution-percent');
+// Datos
 const generacionElem = document.getElementById('generacion');
 const poblacionElem = document.getElementById('poblacion');
+// Botones
+const newGameBtn = document.getElementById('new-game');
+const updateBtn = document.getElementById('update-rules');
+const playBtn = document.getElementById('pause-play');
+const nextGenBtn = document.getElementById('next-gen');
+// ----------------- //
+
 
 // Canvas
 const canvas = document.getElementById('canvas');
@@ -14,84 +27,122 @@ const ctx = canvas.getContext('2d');
 // Datos
 var generacion;
 var poblacion;
+var FPS;
+var porcentajeDistribucion;
 // Tablero
 var cellSize;
 var gridSize;
 var tablero;
-
+// Variables de control
+var playing;
+var gameInterval;
 // Hormgias
 var hormigas = [];
-var hormigasReinas = [];
-var hormigasReproductoras = [];
-var hormigasTrabajadoras = [];
-var hormigasSoldado = [];
 var cantidadDistribucion;
-var colorReina;
-var colorReproductora;
-var colorTrabajadora;
-var colorSoldado;
+// Colores de las hormigas
+const colorReina = '#F01A17'; // rojo
+const colorReproductora = '#17E0F0'; // cyan
+const colorTrabajadora = '#B900FE' // morado
+const colorSoldado = '#42F017'; // verde fuerte
+// Porcentaje de probabilidad de hormigas
+const probabilidadReina = .01;
+const probabilidadReproductora = .09;
+const probabilidadSoldado = .35;
+const probabilidadTrabajadora = .55;
+
 /*********************/
 /** EVENT LISTENERS **/
 /*********************/
 
-document.addEventListener('DOMContentLoaded', () => {
-    cellSize = 1;
-    gridSize = 1000;
-    generacion = 0;
-    cantidadDistribucion = Math.floor(gridSize * 0.5);
-    // Colores de las hormigas
-    colorReina = '#F01A17';
-    colorReproductora = '#17E0F0';
-    colorTrabajadora = '#DCF017'
-    colorSoldado = '#42F017';
-    // Tamaño y limpieza del canvas
-    canvas.width = gridSize * cellSize;
-    canvas.height = gridSize * cellSize;
-    // Creacion del tablero(Arreglo)
-    tablero = iniciarMundo();
-
-    //hormigas = generarHormigas();
-    //play();
-
-    generarHormigas2();
-    //nextGen2();
-    //console.log(hormigas);
-    play2();
-
-    console.log(Math.random() < .5);
-});
+document.addEventListener('DOMContentLoaded', loadDefaultSettings);
+newGameBtn.addEventListener('click', newGame);
+updateBtn.addEventListener('click', updateRules);
+playBtn.addEventListener('click', play);
+nextGenBtn.addEventListener('click', nextGen);
 
 /***************/
 /** FUNCIONES **/
 /***************/
 
-function play() {
-    let gameInterval = setInterval(nextGen, 1000/60);
+function loadDefaultSettings() {
+    // Parametros del programa
+    gridSizeElem.value = 10;
+    cellSizeElem.value = 5;
+    generacion = 0;
+    distributionPercentElem.value = 0.05;
+    frameRateElem.value = 50;
+
+    playing = false;
+
+    updateRules();
 }
-function play2() {
-    let gameInterval = setInterval(nextGen2, 1000/60);
+
+function updateRules() {
+    if (playing === true) {
+        play();
+    }
+    // Obtenemos los valores de los elementos HTML
+    gridSize = gridSizeElem.value;
+    cellSize = cellSizeElem.value;
+    porcentajeDistribucion = distributionPercentElem.value;
+    FPS = frameRateElem.value;
+    cantidadDistribucion = Math.floor((gridSize * gridSize) * porcentajeDistribucion);
+    // Tamaño y limpieza del canvas
+    canvas.width = gridSize * cellSize;
+    canvas.height = gridSize * cellSize;
+    // Imprimimos las hormigas
+    hormigas.forEach(function (hormiga) {
+        hormiga.dibujarHormiga(ctx, cellSize);
+    });
+    imprimirDatos();
+}
+
+function play() {
+    playing = !playing;
+    if (playing) {
+        gameInterval = setInterval(nextGen, 1000 / FPS);
+    } else {
+        clearInterval(gameInterval)
+    }
+}
+
+function newGame() {
+    if (playing === true) {
+        play(); // Pausamos el juego si se esta ejecutando
+    }
+    // Reiniciamos los datos
+    generacion = 0;
+    poblacion = 0;
+    // Creamos el tablero
+    tablero = iniciarMundo();
+    // Generamos las hormigas en el mundo
+    generarHormigas();
+    //console.log(hormigas);
+    imprimirDatos();
 }
 
 function nextGen() {
-    hormigas.forEach(function (hormiga) {
-        hormiga.turno(ctx, tablero, cellSize, hormigas);
+    let hormigasMuertas = [];
+    for (let i = 0; i < hormigas.length; i++) {
+        hormigas[i].turno(ctx, tablero, cellSize, hormigas);
+        if (hormigas[i].periodoVida <= 0) {
+            hormigas[i].morir(ctx, tablero, cellSize);
+            hormigasMuertas.push(hormigas[i].id);
+        }
+    }
+
+    hormigasMuertas.forEach(function (id) {
+        quitarHormiga(id);
     });
+
+    if (generacion === 80) {
+        console.log(hormigasMuertas);
+        console.log(hormigas);
+    }
+
     generacion = generacion + 1;
     generacionElem.innerText = generacion;
     poblacionElem.innerText = hormigas.length;
-}
-
-function nextGen2() {
-    poblacion = 0;
-    hormigas.forEach(function (listaHormigas) {
-        listaHormigas.forEach(function (hormiga) {
-            hormiga.turno(ctx, tablero, cellSize, listaHormigas);
-            poblacion = poblacion + 1;
-        });
-    });
-    generacion = generacion + 1;
-    generacionElem.innerText = generacion;
-    poblacionElem.innerText = poblacion;
 }
 
 function iniciarMundo() {
@@ -109,128 +160,83 @@ function iniciarMundo() {
     return nuevoMundo;
 }
 
-function generarColor() {
-    let color = '#';
-    let letras = ['a', 'b', 'c', 'd', 'e', 'f', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
-    for (let i = 0; i < 6; i++) {
-        color = color + letras[(Math.random() * 15).toFixed(0)];
-    }
-    return color
-}
-
-function generarHormigas2() {
-    hormigas.push(hormigasReinas);
-    hormigas.push(hormigasReproductoras);
-    hormigas.push(hormigasTrabajadoras);
-    hormigas.push(hormigasSoldado);
-
-    let probabilidadReina = .01;
-    let probabilidadReproductora = .09;
-    let probabilidadSoldado = .35
-    let probabilidadTrabajadora = .55;
-
-    for (let i = 0; i < cantidadDistribucion; i++) {
-        if (Math.random() < probabilidadReina) {
-            // Creamos una hormiga reina
-            hormigasReinas.push(new Reina(
-                i,
-                Math.floor(Math.random() * gridSize),
-                Math.floor(Math.random() * gridSize),
-                generarDireccion(),
-                '#F0F0F0',
-                colorReina
-            ));
-        } else if (Math.random() < probabilidadReproductora) {
-            // Creamos una hormiga reproductora
-            hormigasReproductoras.push(new Reproductora(
-                i,
-                Math.floor(Math.random() * gridSize),
-                Math.floor(Math.random() * gridSize),
-                generarDireccion(),
-                '#F0F0F0',
-                colorReproductora
-            ));
-        } else if (Math.random() < probabilidadSoldado) {
-            // Creamos una hormiga soldado
-            hormigasSoldado.push(new Soldado(
-                i,
-                Math.floor(Math.random() * gridSize),
-                Math.floor(Math.random() * gridSize),
-                generarDireccion(),
-                '#F0F0F0',
-                colorSoldado
-            ));
-        } else if (Math.random() < probabilidadTrabajadora) {
-            // Creamos una hormiga trabajadora
-            hormigasTrabajadoras.push(new Trabajadora(
-                i,
-                Math.floor(Math.random() * gridSize),
-                Math.floor(Math.random() * gridSize),
-                generarDireccion(),
-                '#F0F0F0',
-                colorTrabajadora
-            ));
-        }
-        
-    }
-}
-
 function generarHormigas() {
-    
-    let hormigas_aux = [];
-    let probabilidadReina = .01;
-    let probabilidadReproductora = .09;
-    let probabilidadSoldado = .35
-    let probabilidadTrabajadora = .55;
-
+    hormigas = []
     for (let i = 0; i < cantidadDistribucion; i++) {
-        if (Math.random() < probabilidadReina) {
-            // Creamos una hormiga reina
-            hormigas_aux.push(new Reina(
-                i,
-                Math.floor(Math.random() * gridSize),
-                Math.floor(Math.random() * gridSize),
-                generarDireccion(),
-                '#F0F0F0',
-                colorReina
-            ));
-        } else if (Math.random() < probabilidadReproductora) {
-            // Creamos una hormiga reproductora
-            hormigas_aux.push(new Reproductora(
-                i,
-                Math.floor(Math.random() * gridSize),
-                Math.floor(Math.random() * gridSize),
-                generarDireccion(),
-                '#F0F0F0',
-                colorReproductora
-            ));
-        } else if (Math.random() < probabilidadSoldado) {
-            // Creamos una hormiga soldado
-            hormigas_aux.push(new Soldado(
-                i,
-                Math.floor(Math.random() * gridSize),
-                Math.floor(Math.random() * gridSize),
-                generarDireccion(),
-                '#F0F0F0',
-                colorSoldado
-            ));
-        } else if (Math.random() < probabilidadTrabajadora) {
-            // Creamos una hormiga trabajadora
-            hormigas_aux.push(new Trabajadora(
-                i,
-                Math.floor(Math.random() * gridSize),
-                Math.floor(Math.random() * gridSize),
-                generarDireccion(),
-                '#F0F0F0',
-                colorTrabajadora
-            ));
-        }
-        
+        crearHormiga(Math.floor(Math.random() * gridSize), Math.floor(Math.random() * gridSize));
     }
-    return hormigas_aux;
+    poblacion = hormigas.length;
+}
+
+function crearHormiga(x, y) {
+    let nuevaHormiga = null;
+    if (Math.random() < probabilidadReina) {
+        // Creamos una hormiga reina
+        nuevaHormiga = new Reina(
+            x,
+            y,
+            generarDireccion(),
+            colorReina
+        );
+    } else if (Math.random() < probabilidadReproductora) {
+        // Creamos una hormiga reproductora
+        nuevaHormiga = new Reproductora(
+            x,
+            y,
+            generarDireccion(),
+            colorReproductora
+        );
+    } else if (Math.random() < probabilidadSoldado) {
+        // Creamos una hormiga soldado
+        nuevaHormiga = new Soldado(
+            x,
+            y,
+            generarDireccion(),
+            colorSoldado
+        );
+    } else if (Math.random() < probabilidadTrabajadora) {
+        // Creamos una hormiga trabajadora
+        nuevaHormiga = new Trabajadora(
+            x,
+            y,
+            generarDireccion(),
+            colorTrabajadora
+        );
+    }
+
+    if (nuevaHormiga != null) {
+        nuevaHormiga.dibujarHormiga(ctx, cellSize);
+        hormigas.push(nuevaHormiga);
+    }
+
+}
+
+function clickCanvas(e) {
+    let coordenadas = getCursorPosition(e);
+    poblacion = poblacion + 1;
+    crearHormiga(coordenadas[0], coordenadas[1]);
+}
+
+
+function imprimirDatos() {
+    poblacionElem.innerText = hormigas.length;
+    generacionElem.innerText = generacion;
 }
 
 function generarDireccion() {
     let direcciones = ['U', 'D', 'L', 'R'];
     return direcciones[Math.floor(Math.random() * 3).toFixed(0)];
+}
+
+function quitarHormiga(id) {
+    let pos = hormigas.findIndex(hormiga => hormiga.id === id);
+    hormigas.splice(pos, 1);
+}
+
+function getCursorPosition(event) {
+    let rect = canvas.getBoundingClientRect();
+    let x = Math.floor((event.clientX - rect.left) / cellSize);
+    let y = Math.floor((event.clientY - rect.top) / cellSize);
+
+    return [x, y];
 }
